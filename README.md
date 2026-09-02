@@ -69,7 +69,7 @@ Real-time academic collaboration platform with:
 
 ## 📫 How to Reach Me
 
-- 📧 [oluwaseyiogunso1a90@gmail.com](mailto:oluwaseyiogunso1a90@gmail.com)
+- 📧 [oluwaseyiogunso1a90@gmail.com](mailto:oluwaseyiogunsola90@gmail.com)
 - 🔗 [LinkedIn](https://linkedin.com/in/dev-paul-697727376)
 - 🌐 [Portfolio](https://portfolio-five-orcin-3go8vhmpm0.vercel.app/)
 
