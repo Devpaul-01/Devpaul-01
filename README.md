@@ -50,14 +50,7 @@ A peer academic collaboration platform (group chat, live study sessions, AI tuto
 
 🔗 [Live demo](https://web-production-cd6dc0.up.railway.app)
 
----
 
-## Experience
-
-**Freelance Web Developer** — local salon booking platform (Jun–Aug 2025)
-Designed and shipped a Node.js/Express + PostgreSQL booking API end-to-end — requirements through deployment (Vercel/Railway, custom domain + SSL) — and maintained it in production for 3 months post-launch.
-
----
 
 ## Stack
 
