@@ -4,7 +4,7 @@
 
 I build systems where correctness under concurrency and failure matters more than surface features — financial ledgers that can't silently lose data, multi-provider AI pipelines that degrade instead of breaking, and background job systems designed to survive crashes and races rather than just handle the happy path.
 
-Open to **Global Remote Roles & Contractor Contracts**, remote or relocation.
+Open to **Global Remote Roles & Contractor Contracts**
 
 ---
 
