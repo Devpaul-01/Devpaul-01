@@ -48,7 +48,7 @@ An asynchronous, multi-worker peer-learning backend engineered for zero single-p
 * **Distributed State Scaling:** Shifted WebSocket presence, rate limiting, and cron scheduler locks to Redis, enabling horizontal scaling across multi-worker setups (`gunicorn -w N`).
 * **Latency Isolation:** Offloaded LLM execution to a bounded 8-worker thread pool, preventing slow AI responses from blocking the main WebSocket event loop handling real-time messaging.
 * **Security & Token Rotation:** Implemented SHA-256 hashed refresh token rotation with an automated 10-second grace window to handle multi-tab browser races while detecting token-reuse attacks.
-* 🔗 **[Live Demo](https://web-production-cd6dc0.up.railway.app)**
+* 🔗 **[Live Demo](https://studyhub-two-psi.vercel.app/)**
 
 ---
 
