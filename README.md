@@ -1,12 +1,26 @@
 # Toluwase Ogunsola
 **Backend Systems & Distributed Infrastructure Engineer**  
-*TypeScript · Node.js · Python · PostgreSQL · Redis · LLM Orchestration*
+*TypeScript · Node.js · Python · PostgreSQL · Redis · Distributed Systems & Concurrency*
 
-I engineer backend systems where **correctness under concurrency and failure** is the core requirement—building append-only financial ledgers, fault-tolerant multi-provider AI infrastructure, and crash-resilient background execution pipelines.
+I engineer backend systems where **correctness under concurrency and failure** is the core requirement—building append-only financial ledgers, distributed coordination primitives, fault-tolerant multi-provider AI infrastructure, and crash-resilient background processing pipelines.
 
 📫 **Email:** [oluwaseyiogunsola90@gmail.com](mailto:oluwaseyiogunsola90@gmail.com) | 💼 **LinkedIn:** [in/dev-paul-697727376](https://linkedin.com/in/dev-paul-697727376) | 🌐 **Portfolio:** [portfolio-five-orcin-3go8vhmpm0.vercel.app](https://portfolio-five-orcin-3go8vhmpm0.vercel.app/)
 
 > **Open to Global Remote Roles & Contract Engineering Opportunities**
+
+---
+
+### 🔥 Active Focus & Infrastructure Highlight
+
+#### ⚙️ [agent-broker](https://github.com/Devpaul-01/agent-broker) — *In-Process Distributed Concurrency & Reservation Engine*
+`TypeScript` `Node.js` `Redis` `Lua` `Distributed Systems`
+
+An in-process TypeScript library engineered to solve **cross-process race conditions, uncoordinated retry storms, and delegation depth limits** across independent, distributed processes via Redis.
+
+* **Atomic Lua Gatekeeping:** Consolidated budget pools, concurrency caps, and circuit-breaker checks into a single atomic Redis Lua script—eliminating check-then-act race conditions across concurrent callers.
+* **Reservation & Reconciliation Engine:** Built a check-and-decrement budget manager using TTL reservations and lazy cleanup, preventing concurrent pool overspending prior to downstream execution.
+* **Sliding-Window Circuit Breakers:** Implemented a Redis Sorted Set failure tracker with a 3-state circuit breaker (`Closed` → `Open` → `Recovering`) to isolate failing endpoints and prevent cascading failures.
+* **Immutable Tree Depth Guard:** Enforced broker-level immutable execution depth limits to catch recursive or infinite agent delegation loops before resource exhaustion.
 
 ---
 
@@ -43,6 +57,7 @@ An asynchronous, multi-worker peer-learning backend engineered for zero single-p
 
 An AI coaching and sales analysis engine optimized for latency reduction and API cost control.
 
+* **Distributed Concurrency Guard:** Engineered a generic Redis Sorted Set slot registry to replace deadlocking local promise queues across distributed nodes, featuring automated staleness sweeps and fail-open degradation.
 * **Distributed Fallback Chain:** Built a 4-provider LLM fallback system (Cerebras → Groq → Mistral → OpenRouter) with Redis-backed cooldown states across instances to prevent cascading API rate limits.
 * **Payload Consolidation (75% Latency Reduction):** Consolidated 4 sequential LLM calls into a single structured payload, dropping response latency from 3.2s to 800ms and cutting API costs by ~60%.
 * **Pre-Call Token Gating:** Engineered an audit-logged caching module that reuses existing prospect research within a 14-day sliding window, preventing token waste on recurring workflows.
@@ -54,8 +69,9 @@ An AI coaching and sales analysis engine optimized for latency reduction and API
 | Category | Technologies & Concepts |
 | :--- | :--- |
 | **Languages** | TypeScript, JavaScript, Python, SQL |
-| **Backend & Architecture** | Node.js, Express, Flask, REST APIs, Distributed Systems, Asynchronous Processing, Idempotency |
-| **Databases & Queues** | PostgreSQL (RPCs, Indexes, Transactions), Redis, BullMQ, RQ, SQLAlchemy, Supabase |
-| **AI Systems** | Multi-Provider LLM Orchestration, Streaming APIs, Fallback Chains, Cost Optimization |
-| **Security & Auth** | JWT, Refresh Token Rotation, RBAC, OAuth, Rate Limiting, CSRF Protection |
+| **Backend & Distributed Systems** | Node.js, Express, Flask, REST APIs, Concurrency Control, Race Conditions, Idempotency, Circuit Breakers |
+| **Databases & Caching** | PostgreSQL (RPCs, Indexes, Transactions, Row-locking), Redis (Lua Scripting, Sorted Sets, Pipelines), Supabase |
+| **Queues & Asynchronous Processing** | BullMQ, RQ, Background Workers, Notification Outbox Patterns |
+| **AI Infrastructure** | Multi-Provider LLM Orchestration, Fallback Chains, Cost Optimization, Rate-Limit Cooldowns |
+| **Security & Observability** | JWT, Refresh Token Rotation, RBAC, Rate Limiting, Request Trace IDs (`X-Trace-Id`), Sentry Alerting |
 | **Infra & Testing** | Docker, GitHub Actions (CI/CD), Jest, Pytest, AWS, Railway, Vercel |
