@@ -1,21 +1,20 @@
 # Toluwase Ogunsola
-**Backend Systems & Distributed Infrastructure Engineer**  
-*TypeScript · Node.js · Python · PostgreSQL · Redis · Distributed Systems & Concurrency*
 
-I engineer backend systems where **correctness under concurrency and failure** is the core requirement—building append-only financial ledgers, distributed coordination primitives, fault-tolerant multi-provider AI infrastructure, and crash-resilient background processing pipelines.
+**Backend Engineer — Distributed Systems, Concurrency Control & AI Infrastructure**
+`TypeScript` · `Go` · `Python` · `Node.js` · `PostgreSQL` · `Redis` · `Lua`
 
-📫 **Email:** [oluwaseyiogunsola90@gmail.com](mailto:oluwaseyiogunsola90@gmail.com) | 💼 **LinkedIn:** [in/dev-paul-697727376](https://linkedin.com/in/dev-paul-697727376) | 🌐 **Portfolio:** [portfolio-five-orcin-3go8vhmpm0.vercel.app](https://portfolio-five-orcin-3go8vhmpm0.vercel.app/)
+I build backend systems where **correctness under concurrency and failure** is the actual requirement — atomic admission control for multi-process agents, immutable financial ledgers, multi-provider LLM gateways with circuit breakers, and crash-resilient background pipelines. Verification over assertion: every project below ships with tests that exercise the failure paths, not just the happy path.
 
-> **Open to Global Remote Roles & Contract Engineering Opportunities**
+📫 [oluwaseyiogunsola90@gmail.com](mailto:oluwaseyiogunsola90@gmail.com) · 💼 [linkedin.com/in/dev-paul-697727376](https://linkedin.com/in/dev-paul-697727376) · 🌐 [Portfolio](https://portfolio-five-orcin-3go8vhmpm0.vercel.app/)
+
+> **Open to global remote roles & contract engineering work**
 
 ---
 
-### 🔥 Active Focus & Infrastructure Highlight
+## 🔥 Currently building: [agent-broker](https://github.com/Devpaul-01/agent-broker)
+*A Redis-backed admission gate for multi-process agent systems* · [npm](https://www.npmjs.com/package/agent-broker) · `TypeScript` `Python` `Redis` `Lua`
 
-#### ⚙️ [agent-broker](https://github.com/Devpaul-01/agent-broker) — *Redis-Backed Admission Gate for Multi-Process Agent Systems*
-`TypeScript` `Python` `Node.js` `Redis` `Lua` `Distributed Systems` · [Published on npm](https://www.npmjs.com/package/agent-broker)
-
-A library that answers one question under real concurrency: *"is this call allowed right now?"* It coordinates shared budget, delegation depth, in-flight concurrency and circuit-breaker state across **independent processes** through Redis. TypeScript and Python implementations run the same Lua scripts against the same keys, so processes in both languages can share one budget pool.
+Multiple OS processes sharing a rate-limited resource (LLM providers) can't fix check-then-spend races by coordinating locally — there's no "local" to coordinate. `agent-broker` answers *"is this call allowed right now?"* in one atomic Redis round trip, so independent processes — in either language — share one real admission decision.
 
 ```
 $ npm run demo:race
@@ -23,61 +22,79 @@ $ npm run demo:race
 admitted: 3   denied: 27   OK exactly 3
 ```
 
-* **Atomic Lua Gatekeeping:** Agent, circuit, budget and concurrency checks and reservations happen in a single Redis Lua script, so there is no check-then-act window for racing callers.
-* **Reservation & Reconciliation:** TTL reservations settle on `reportOutcome`; a lazy sweep recovers reservations from crashed callers and refuses late reports, so nothing is refunded twice.
-* **Sliding-Window Circuit Breaker:** Redis sorted-set failure window per target, with probe-based recovery. One successful probe closes the circuit (the original 3-state design was retired, with the reasoning recorded in [ADR-0010](https://github.com/Devpaul-01/agent-broker/blob/main/docs/adr/0010-single-probe-circuit-recovery.md)).
-* **Verified, not asserted:** 188 tests across 27 files against a real Redis, with failure-mode suites that race real forked processes; cross-language tests with TypeScript and Python workers on one Redis; 26 ADRs; local admission latency measured at a median of about 0.25 ms (benchmark, not a production figure).
+- **One atomic script, not a check-then-act sequence.** `REQUEST_PERMISSION` checks circuit state, budget, and concurrency and reserves all three in a single Lua script — explicitly rejected a split-script design (ADR-0023) because the gap *between* scripts would reopen the exact race the single script closes.
+- **Dual-language, byte-identical protocol.** TypeScript and Python implementations are kept honest by an automated test (`test_script_equivalence.py`) that regex-extracts both Lua scripts and diffs them — not a comment promising they match.
+- **Single-probe circuit recovery** on a Redis sorted-set failure window, with the earlier 3-state design and the reasoning for retiring it written up in [ADR-0010](https://github.com/Devpaul-01/agent-broker/blob/main/docs/adr/0010-single-probe-circuit-recovery.md).
+- **TOCTOU-safe identity.** Agent depth, root ID, and budget key are always re-derived server-side inside the registration script — never trusted from caller input (ADR-0012, backed by an explicit depth-spoofing test).
+- **Verified, not asserted:** 188 tests across 27 files (TS) + 68 tests across 14 files (Python) against real Redis, including tests that fork actual OS processes to check cross-process visibility and crash recovery. 26 ADRs. Admission latency benchmarked at a median of ~0.25ms, p99 under 5.3ms (N=1000) — benchmark doc includes its own repro commands and documents 3 mistakes found mid-measurement rather than smoothing them over.
 
 ---
 
-### 🚀 Core Engineering Projects
+## 🚀 Core Engineering Projects
 
-#### 🏦 [Kith](https://github.com/Devpaul-01/Kith) — *Financial Ledger & Coordination Platform*
-`Node.js` `TypeScript` `Express` `PostgreSQL` `Redis` `BullMQ` `Supabase`
+### 🌐 [llm-gateway](https://github.com/Devpaul-01/llm-gateway) — *Self-Hostable Multi-Provider LLM Gateway*
+`Go` `PostgreSQL` `Redis` `Lua` `Prometheus`
 
-A multi-tenant financial infrastructure platform designed for immutable state and high concurrency. **199 API endpoints, ~30 core tables, 20 Architecture Decision Records (ADRs).**
+An OpenAI-API-compatible gateway in front of 12 LLM providers — drop-in `base_url` swap, with the reliability and cost controls a production app actually needs underneath.
 
-* **Immutable Append-Only Ledger:** Historical state is immutable; corrections are executed as new linked ledger entries. Idempotency keys + a duplicate-submission heuristic prevent double-spends and network retry bugs.
-* **Atomic PostgreSQL RPCs:** Moved race-sensitive operations (disputes, invite acceptances, recurring target conversions) into atomic database transactions, eliminating check-then-write race conditions.
-* **Durable 9-Queue Pipeline:** Engineered a BullMQ async pipeline with per-queue rate limits and a PostgreSQL notification outbox pattern with recovery scans for stuck jobs (99.9% delivery reliability).
-* **Zero-Trust Multi-Tenant Auth:** Enforced JWT → Workspace → Role verification cached in Redis (30s actively invalidated TTL) with enumeration-resistant 404s on unauthorized access.
-* 🔗 **[Live Demo](https://kith-self.vercel.app)**
+- **Redis-backed circuit breaker per provider credential:** 5 failures in a 30s window opens it (atomic Lua `INCR`+`EXPIRE`); open providers fall to the back of the candidate chain rather than being removed, so they're retried once healthy.
+- **Candidate-chain failover:** each request resolves into an ordered list across the model's fallback chain × every credential the project owns, filtered live by breaker and per-key cooldown state.
+- **Exact-match response cache with O(1) bulk invalidation:** SHA-256-keyed, epoch-counter based — bumping a project's epoch invalidates every prior cache entry instantly with no key scan, and a Lua script re-checks the epoch at write time so an in-flight response can't repopulate a cache that was just invalidated.
+- **Atomic token-budget gating:** daily per-project budget enforced by a Lua check-and-reserve script, settled against actual usage after the response completes (refunds over-estimates, charges overshoots).
+- **Credentials encrypted at rest** with AES-256-GCM; all hot-path coordination (rate limiting, budget, cache, concurrency) is single-round-trip Lua, not multi-command sequences.
+- 84 tests across 22 files, CI runs `go test -race ./...` against real Postgres and Redis service containers, not mocks.
 
 ---
 
-#### 🧠 [StudyHub](https://github.com/Devpaul-01/Studyhub) — *Resilient AI & Real-Time Collaboration Infrastructure*
+### 🏦 [Kith](https://github.com/Devpaul-01/Kith) — *Financial Ledger & Coordination Platform*
+`Node.js` `Express` `PostgreSQL` `Redis` `BullMQ` `Supabase`
+
+Multi-tenant infrastructure for family financial coordination, built around an append-only ledger. **122 API endpoints, 23 tables, 21 ADRs, 73 test files.**
+
+- **Immutability enforced at the database, not just the app layer.** A Postgres trigger (`enforce_ledger_entry_immutability`) blocks column changes on confirmed/disputed/resolved ledger rows — added specifically because admin writes use the service-role key and bypass RLS. Corrections are new linked entries, never edits.
+- **Two independent idempotency defenses:** a client-supplied key under a DB unique constraint, plus a separate atomic RPC (`create_ledger_entry_checked`) that takes a Postgres advisory lock and checks for near-duplicate submissions within a configurable window — closing the race where two concurrent submissions both pass the check before either commits.
+- **Atomic multi-step writes via Postgres RPCs**, not app-level transactions: `raise_dispute_atomic` row-locks the ledger entry before creating a dispute, closing the double-dispute race; `resolve_dispute_atomic` does the equivalent for resolution.
+- **9-queue BullMQ pipeline** with a notification outbox table and a recovery scan that re-enqueues stuck deliveries.
+- **Zero-trust auth path:** JWT → workspace membership → role, with membership cached in Redis for 30s and actively invalidated on mutation — and every authorization failure returns a uniform 404, never 403, to stay enumeration-resistant.
+- 🔗 [Live demo](https://kith-self.vercel.app)
+
+---
+
+### 🧠 [StudyHub](https://github.com/Devpaul-01/Studyhub) — *Resilient AI & Real-Time Collaboration Backend*
 `Python` `Flask` `PostgreSQL` `Redis` `WebSockets`
 
-An asynchronous, multi-worker peer-learning backend engineered for zero single-points-of-failure under concurrent scale.
+A peer-learning platform backend — social feed, live co-study sessions, and an AI study assistant — engineered for multi-worker horizontal scaling with no single point of failure.
 
-* **Multi-Provider AI Resilience:** Built a 6-provider LLM failover system with structured error classification (`KEY_FAULT`, `PROVIDER_TRANSIENT`, `BAD_MODEL`) to guarantee near-100% uptime during upstream API outages.
-* **Distributed State Scaling:** Shifted WebSocket presence, rate limiting, and cron scheduler locks to Redis, enabling horizontal scaling across multi-worker setups (`gunicorn -w N`).
-* **Latency Isolation:** Offloaded LLM execution to a bounded 8-worker thread pool, preventing slow AI responses from blocking the main WebSocket event loop handling real-time messaging.
-* **Security & Token Rotation:** Implemented SHA-256 hashed refresh token rotation with an automated 10-second grace window to handle multi-tab browser races while detecting token-reuse attacks.
-* 🔗 **[Live Demo](https://studyhub-two-psi.vercel.app/)**
-
----
-
-#### 💼 [FounderSales](https://github.com/Devpaul-01/Foundersales) — *AI Sales Coaching Platform*
-`Node.js` `TypeScript` `Express` `PostgreSQL` `Redis` `BullMQ`
-
-An AI coaching and sales analysis engine optimized for latency reduction and API cost control.
-
-* **Distributed Concurrency Guard:** Engineered a generic Redis Sorted Set slot registry to replace deadlocking local promise queues across distributed nodes, featuring automated staleness sweeps and fail-open degradation.
-* **Distributed Fallback Chain:** Built a 4-provider LLM fallback system (Cerebras → Groq → Mistral → OpenRouter) with Redis-backed cooldown states across instances to prevent cascading API rate limits.
-* **Payload Consolidation (75% Latency Reduction):** Consolidated 4 sequential LLM calls into a single structured payload, dropping response latency from 3.2s to 800ms and cutting API costs by ~60%.
-* **Pre-Call Token Gating:** Engineered an audit-logged caching module that reuses existing prospect research within a 14-day sliding window, preventing token waste on recurring workflows.
+- **6-provider LLM failover** (Gemini → Groq → Cohere → Cloudflare → Mistral → OpenRouter) with 4-way error classification (`KEY_FAULT`, `PROVIDER_TRANSIENT`, `BAD_MODEL`, `NON_RETRYABLE`) deciding whether to cool a key, evict a model, or abort — Redis-backed so cooldown state is shared across `gunicorn -w N` workers, fail-open to in-process state if Redis is unavailable.
+- **WebSocket presence, thread rate limits, and scheduler locks moved to Redis** so any of N workers can serve any client; Socket.IO's `message_queue` is wired to Redis for cross-instance delivery.
+- **Distributed scheduler lock that fails closed** — the opposite default of everything else in the app: if Redis is unreachable, a cron job is skipped rather than risking duplicate execution across workers. Benchmarked at 0 overlap violations across 90 trials (up to 25 concurrent processes) against a naive baseline that produced up to 4,750.
+- **8-worker thread pool isolates AI latency** from the WebSocket event loop, so a slow provider call never blocks real-time message delivery.
+- **Refresh-token rotation with reuse detection:** tokens stored only as SHA-256 hashes, rotated on every use, with a 10-second grace window to tolerate legitimate multi-tab races without treating them as theft — reuse outside that window revokes the entire token family.
+- 87 test files, 1,400+ tests. 🔗 [Live demo](https://studyhub-two-psi.vercel.app/)
 
 ---
 
-### 🛠️ Technical Capabilities
+### 💼 [FounderSales](https://github.com/Devpaul-01/Foundersales) — *AI Sales Coaching Platform*
+`Node.js` `Express` `PostgreSQL` `Redis` `BullMQ`
+
+AI-driven sales coaching and outreach: voice-profile-driven opportunity discovery, live simulated buyer practice sessions, and calendar-aware meeting prep.
+
+- **Redis sorted-set concurrency guard** replaced a local promise-queue design that could deadlock a process with no in-flight work waiting on a promise nothing would resolve. Stale slots self-heal via a timestamp-scored sweep on every check — no separate reaper job — and the guard fails open on Redis errors rather than blocking real requests.
+- **4-provider LLM fallback** (Cerebras → Groq → Mistral → OpenRouter) with Redis-backed per-key cooldowns, generalized enough that the same module also handles external API key rotation elsewhere in the app.
+- **Consolidated multi-call AI flows into single structured calls** (e.g. merging reply generation, outcome classification, and coaching tip into one request instead of several sequential ones) to cut both latency and cost.
+- **14-day research-reuse gate:** before paying for new prospect research, checks for existing research on the same prospect within a 14-day window and logs every gate decision (proceed/skip + reason) to an audit table — so the cost-saving claim is independently checkable, not just asserted.
+- 190 API endpoints across 48 tables.
+
+---
+
+## 🛠️ Technical Capabilities
 
 | Category | Technologies & Concepts |
 | :--- | :--- |
-| **Languages** | TypeScript, JavaScript, Python, SQL |
-| **Backend & Distributed Systems** | Node.js, Express, Flask, REST APIs, Concurrency Control, Race Conditions, Idempotency, Circuit Breakers |
-| **Databases & Caching** | PostgreSQL (RPCs, Indexes, Transactions, Row-locking), Redis (Lua Scripting, Sorted Sets, Pipelines), Supabase |
-| **Queues & Asynchronous Processing** | BullMQ, RQ, Background Workers, Notification Outbox Patterns |
-| **AI Infrastructure** | Multi-Provider LLM Orchestration, Fallback Chains, Cost Optimization, Rate-Limit Cooldowns |
-| **Security & Observability** | JWT, Refresh Token Rotation, RBAC, Rate Limiting, Request Trace IDs (`X-Trace-Id`), Sentry Alerting |
-| **Infra & Testing** | Docker, GitHub Actions (CI/CD), Jest, Pytest, AWS, Railway, Vercel |
+| **Languages** | TypeScript, JavaScript, Go, Python, SQL |
+| **Backend & Distributed Systems** | Node.js, Express, Flask, net/http, REST APIs, Concurrency Control, Race Conditions, Idempotency, Circuit Breakers, Admission Control |
+| **Databases & Caching** | PostgreSQL (RPCs, triggers, advisory locks, row-locking), Redis (Lua scripting, sorted sets, pub/sub), Supabase |
+| **Queues & Async Processing** | BullMQ, RQ, Background Workers, Notification Outbox Pattern, Distributed Scheduler Locks |
+| **AI Infrastructure** | Multi-Provider LLM Orchestration (4–12 providers across projects), Fallback Chains, Response Caching, Token Budgeting, Cost Optimization |
+| **Security & Observability** | JWT, Refresh Token Rotation, AES-256-GCM Encryption at Rest, RBAC, Rate Limiting, Prometheus/Grafana, Sentry |
+| **Infra & Testing** | Docker, GitHub Actions (CI, incl. `-race` against real Postgres/Redis), Jest, Pytest, Go testing, Vercel, Railway |
